@@ -41,30 +41,34 @@ func Analyze(paths []string, ignore *regexp.Regexp) Stats {
 
 func analyzeDir(dirname string, ignore *regexp.Regexp, stats Stats) Stats {
 	filepath.WalkDir(dirname, func(path string, entry fs.DirEntry, err error) error {
-		if isSkipDir(entry) {
-			return filepath.SkipDir
+		if err != nil {
+			return err
 		}
-		if err == nil && isGoFile(entry) {
+
+		if entry.IsDir() {
+			if skipDir(entry.Name()) {
+				return filepath.SkipDir
+			}
+		} else if isGoFile(entry.Name()) {
 			stats = analyzeFile(path, ignore, stats)
 		}
-		return err
+		return nil
 	})
 	return stats
 }
 
-var skipDirs = map[string]bool{
-	"testdata": true,
-	"vendor":   true,
+func skipDir(name string) bool {
+	switch name {
+	case "testdata", "vendor":
+		return true
+	}
+
+	return strings.HasPrefix(name, ".") && name != "." && name != ".." ||
+		strings.HasPrefix(name, "_")
 }
 
-func isSkipDir(entry fs.DirEntry) bool {
-	return entry.IsDir() && (skipDirs[entry.Name()] ||
-		(strings.HasPrefix(entry.Name(), ".") && entry.Name() != "." && entry.Name() != "..") ||
-		strings.HasPrefix(entry.Name(), "_"))
-}
-
-func isGoFile(entry fs.DirEntry) bool {
-	return !entry.IsDir() && strings.HasSuffix(entry.Name(), ".go")
+func isGoFile(filename string) bool {
+	return strings.HasSuffix(filename, ".go")
 }
 
 func analyzeFile(path string, ignore *regexp.Regexp, stats Stats) Stats {
@@ -144,11 +148,9 @@ func (a *fileAnalyzer) addStatIfNotIgnored(node ast.Node, funcName string, doc *
 // funcName returns the name representation of a function or method:
 // "(Type).Name" for methods or simply "Name" for functions.
 func funcName(fn *ast.FuncDecl) string {
-	if fn.Recv != nil {
-		if fn.Recv.NumFields() > 0 {
-			typ := fn.Recv.List[0].Type
-			return fmt.Sprintf("(%s).%s", recvString(typ), fn.Name)
-		}
+	if fn.Recv != nil && fn.Recv.NumFields() > 0 {
+		typ := fn.Recv.List[0].Type
+		return fmt.Sprintf("(%s).%s", recvString(typ), fn.Name)
 	}
 	return fn.Name.Name
 }
