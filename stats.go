@@ -50,18 +50,16 @@ func (s Stats) TotalComplexity() uint64 {
 // not limit the result. If 'over' is <= 0 it does not limit the result either,
 // because a function has a base cyclomatic complexity of at least 1.
 func (s Stats) SortAndFilter(top, over int) Stats {
-	result := make(Stats, len(s))
-	copy(result, s)
-	sort.Stable(byComplexityDesc(result))
-	for i, stat := range result {
+	sort.Stable(byComplexityDesc(s))
+	for i, stat := range s {
 		if i == top {
-			return result[:i]
+			return s[:i]
 		}
 		if stat.Complexity <= over {
-			return result[:i]
+			return s[:i]
 		}
 	}
-	return result
+	return s
 }
 
 type byComplexityDesc Stats
