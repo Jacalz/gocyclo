@@ -5,6 +5,7 @@
 package gocyclo
 
 import (
+	"cmp"
 	"fmt"
 	"go/token"
 	"slices"
@@ -51,10 +52,7 @@ func (s Stats) TotalComplexity() uint64 {
 // because a function has a base cyclomatic complexity of at least 1.
 func (s Stats) SortAndFilter(top, over int) Stats {
 	slices.SortStableFunc(s, func(a, b Stat) int {
-		if a.Complexity >= b.Complexity {
-			return -1
-		}
-		return 1
+		return cmp.Compare(b.Complexity, a.Complexity)
 	})
 
 	for i, stat := range s {
