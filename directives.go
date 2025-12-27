@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-const prefix = "//gocyclo:"
-
 type directives []string
 
 func (ds directives) HasIgnore() bool {
@@ -28,7 +26,7 @@ func parseDirectives(doc *ast.CommentGroup) directives {
 	}
 	ds := make(directives, 0, len(doc.List))
 	for _, comment := range doc.List {
-		if after, ok := strings.CutPrefix(comment.Text, prefix); ok {
+		if after, ok := strings.CutPrefix(comment.Text, "//gocyclo:"); ok {
 			ds = append(ds, strings.TrimSpace(after))
 		}
 	}
