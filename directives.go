@@ -6,6 +6,7 @@ package gocyclo
 
 import (
 	"go/ast"
+	"slices"
 	"strings"
 )
 
@@ -16,23 +17,17 @@ func (ds directives) HasIgnore() bool {
 }
 
 func (ds directives) isPresent(name string) bool {
-	for _, d := range ds {
-		if d == name {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ds, name)
 }
 
 func parseDirectives(doc *ast.CommentGroup) directives {
 	if doc == nil {
 		return directives{}
 	}
-	const prefix = "//gocyclo:"
-	var ds directives
+	ds := make(directives, 0, len(doc.List))
 	for _, comment := range doc.List {
-		if strings.HasPrefix(comment.Text, prefix) {
-			ds = append(ds, strings.TrimSpace(strings.TrimPrefix(comment.Text, prefix)))
+		if after, ok := strings.CutPrefix(comment.Text, "//gocyclo:"); ok {
+			ds = append(ds, strings.TrimSpace(after))
 		}
 	}
 	return ds
