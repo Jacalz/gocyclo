@@ -1,7 +1,6 @@
 package gocyclo_test
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 
@@ -89,7 +88,7 @@ func TestAnalyze(t *testing.T) {
 			statLines[i] = s.String()
 		}
 		got := strings.Join(statLines, "\n")
-		if !reflect.DeepEqual(got, tt.want) {
+		if got != tt.want {
 			t.Errorf("Analyzed %q and got:\n%s\n\twant:\n%s", tt.paths, got, tt.want)
 		}
 	}

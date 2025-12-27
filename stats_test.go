@@ -1,7 +1,7 @@
 package gocyclo_test
 
 import (
-	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/fzipp/gocyclo"
@@ -137,10 +137,11 @@ func TestSortAndFilter(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		previous := slices.Clone(tt.stats)
 		got := tt.stats.SortAndFilter(tt.top, tt.over)
-		if !reflect.DeepEqual(got, tt.want) {
+		if !slices.Equal(got, tt.want) {
 			t.Errorf("Sort and filter (top %d over %d) for %q, got: %q, want: %q",
-				tt.top, tt.over, tt.stats, got, tt.want)
+				tt.top, tt.over, previous, got, tt.want)
 		}
 	}
 }

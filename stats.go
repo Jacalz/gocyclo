@@ -46,9 +46,10 @@ func (s Stats) TotalComplexity() uint64 {
 }
 
 // SortAndFilter sorts the cyclomatic complexities in s in descending order
-// and returns a slice of s limited to the 'top' N entries with a cyclomatic
-// complexity greater than 'over'. If 'top' is negative, i.e. -1, it does
-// not limit the result. If 'over' is <= 0 it does not limit the result either,
+// (modifying the underlying slice) and returns a slice of s limited to the 'top'
+// N entries with a cyclomatic complexity greater than 'over'.
+// If 'top' is negative, i.e. -1, it does not limit the result.
+// If 'over' is <= 0 it does not limit the result either,
 // because a function has a base cyclomatic complexity of at least 1.
 func (s Stats) SortAndFilter(top, over int) Stats {
 	slices.SortStableFunc(s, func(a, b Stat) int {
