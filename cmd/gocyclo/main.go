@@ -65,7 +65,7 @@ func main() {
 		usage()
 	}
 
-	allStats := gocyclo.Analyze(paths, regexp.MustCompile(*ignore))
+	allStats := gocyclo.Analyze(paths, regex(*ignore))
 	shownStats := allStats.SortAndFilter(*top, *over)
 
 	printStats(shownStats)
@@ -76,6 +76,17 @@ func main() {
 	if *over > 0 && len(shownStats) > 0 {
 		os.Exit(1)
 	}
+}
+
+func regex(expr string) *regexp.Regexp {
+	if expr == "" {
+		return nil
+	}
+	re, err := regexp.Compile(expr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return re
 }
 
 func printStats(s gocyclo.Stats) {
